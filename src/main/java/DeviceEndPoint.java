@@ -17,11 +17,6 @@ public class DeviceEndPoint {
 
      */
 
-    // The device connection string to authenticate the device with your IoT hub.
-    // Using the Azure CLI:
-    // az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id MyJavaDevice --output table
-    private static String connString = "HostName=JavaIoT.azure-devices.net;DeviceId=ExampleDevice;SharedAccessKey=[REMOVED]";
-
     // Using the MQTT protocol to connect to IoT Hub
     private static IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
     private static DeviceClient client;
@@ -59,6 +54,9 @@ public class DeviceEndPoint {
                     String jsonString = randomJson.toString();
                     Message msg = new Message( jsonString);
 
+                    //the queueid will help load-balance the messages.
+                    msg.setProperty("queueid", ""+rand.nextInt());
+
                     System.out.println("Sending message: "+ jsonString);
 
                     Object lockobj = new Object();
@@ -78,7 +76,10 @@ public class DeviceEndPoint {
         }
     }
 
-    public static void main(String[] args) throws IOException, URISyntaxException {
+    public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
+
+        // az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id MyJavaDevice --output table
+        String connString = args[0];//looks like "HostName=JavaIoT.azure-devices.net;DeviceId=ExampleDevice;SharedAccessKey=[SECRET!]";
 
         // Connect to the IoT hub.
         client = new DeviceClient(connString, protocol);
@@ -89,10 +90,12 @@ public class DeviceEndPoint {
         ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.execute(sender);
 
+        while(true){Thread.sleep(5000);}//Without the sleep method, this will chew up all of the CPU on the system!
         // Stop the application.
-        System.out.println("Press ENTER dto exit.");
+        /*System.out.println("Press ENTER to exit.");
         System.in.read();
+        System.out.println("Shutting down.");
         executor.shutdownNow();
-        client.closeNow();
+        client.closeNow();*/
     }
 }

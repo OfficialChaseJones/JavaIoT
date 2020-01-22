@@ -1,2 +1,2 @@
 cd target
-java -cp "D:\PowerShellTools\JavaIoT\target\lib\*;JavaIoT-1.0-SNAPSHOT.jar" BackendEndPoint
+java -cp "D:\PowerShellTools\JavaIoT\target\lib\*;JavaIoT-1.0-SNAPSHOT.jar" BackendEndPoint sb://ihsuprodbyres073dednamespace.servicebus.windows.net/ iothub-ehub-javaiot-2797929-c3ae5eb46e G/WQsLS7VzEtYmqr5K9ZKV8t58+nzO3Jry/EDtN484I= 

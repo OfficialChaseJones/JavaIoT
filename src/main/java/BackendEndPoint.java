@@ -23,15 +23,7 @@ public class BackendEndPoint {
         Code was taken from Microsoft examples and modified.
 
      */
-    // az iot hub show --query properties.eventHubEndpoints.events.endpoint --name {your IoT Hub name}
-    private static final String eventHubsCompatibleEndpoint = "sb://ihsuprodbyres073dednamespace.servicebus.windows.net/";
 
-    // az iot hub show --query properties.eventHubEndpoints.events.path --name {your IoT Hub name}
-    private static final String eventHubsCompatiblePath = "iothub-ehub-javaiot-2797929-c3ae5eb46e";
-
-    // az iot hub policy show --name service --query primaryKey --hub-name {your IoT Hub name}
-    private static final String iotHubSasKey = "[REMOVED]";
-    private static final String iotHubSasKeyName = "service";
 
     // Track all the PartitionReciever instances created.
     private static ArrayList<PartitionReceiver> receivers = new ArrayList<PartitionReceiver>();
@@ -65,8 +57,8 @@ public class BackendEndPoint {
                         for (EventData receivedEvent : receivedEvents) {
                             String receivedMessage = new String(receivedEvent.getBytes(), Charset.defaultCharset());
 
-                            System.out.println(String.format("Message received:\n %s",
-                                    receivedMessage));
+                            System.out.println(String.format("Message received on p%s:\n %s",
+                                    partitionId,receivedMessage));
 
                             JsonDocument doc = JsonDocument.create(receivedMessage);
                             couchbaseBucket.upsert(doc);
@@ -79,8 +71,23 @@ public class BackendEndPoint {
         }, executorService);
     }
 
+    /*
+        args:
+
+
+     */
     public static void main(String[] args)
             throws EventHubException, ExecutionException, InterruptedException, IOException, URISyntaxException {
+
+        // az iot hub show --query properties.eventHubEndpoints.events.endpoint --name {your IoT Hub name}
+       String eventHubsCompatibleEndpoint = args[0];// looks like "sb://ihsupr..........";
+
+        // az iot hub show --query properties.eventHubEndpoints.events.path --name {your IoT Hub name}
+       String eventHubsCompatiblePath = args[1];//looks like "iothub-ehub-javaiot-.........";
+
+        // az iot hub policy show --name service --query primaryKey --hub-name {your IoT Hub name}
+        String iotHubSasKey = args[2];
+        String iotHubSasKeyName = "service";
 
         //Connect to couchbase:
         Cluster cluster = CouchbaseCluster.create();
